@@ -72,6 +72,8 @@ const refs = {
 };
 
 refs.closeBtnEl.textContent = "X";
+let activeImg = 0;
+const imgLength = galleryItems.length - 1;
 
 refs.galleryEl.addEventListener("click", onImgClick);
 refs.closeBtnEl.addEventListener("click", onCloseButtonClick);
@@ -80,45 +82,42 @@ document.addEventListener("keydown", onKeyPress);
 function onImgClick(e) {
   e.preventDefault();
   if (e.target.nodeName !== "IMG") return false;
-  refs.imgEl.src = e.target.dataset.source;
   refs.modalEl.classList.add("is-open");
-  e.target.classList.add("open-img");
+  activeImg = +e.target.dataset.index;
+  getData(activeImg);
 }
 
 function onCloseButtonClick(e) {
   refs.modalEl.classList.remove("is-open");
-  refs.imgEl.src = "";
-}
-
-function getNextPicture() {
-  const currentImg = document.querySelector(".open-img");
-  if (!currentImg) return false;
-  let nextLi = currentImg.parentNode.parentNode.nextSibling;
-  if (!nextLi) nextLi = refs.galleryEl.firstChild;
-  const nextImg = nextLi.querySelector("img");
-  if (!nextImg) return false;
-  refs.imgEl.src = nextImg.dataset.source;
-  currentImg.classList.remove("open-img");
-  nextImg.classList.add("open-img");
-}
-
-function getPrevPicture() {
-  const currentImg = document.querySelector(".open-img");
-  if (!currentImg) return false;
-  let prevLi = currentImg.parentNode.parentNode.previousSibling;
-  if (!prevLi) prevLi = refs.galleryEl.lastChild;
-  const prevImg = prevLi.querySelector("img");
-  if (!prevImg) return false;
-  refs.imgEl.src = prevImg.dataset.source;
-  currentImg.classList.remove("open-img");
-  prevImg.classList.add("open-img");
+  updateAttr();
 }
 
 function onKeyPress(e) {
   if (e.key === "Escape") return onCloseButtonClick();
-  console.log(e.key);
   if (e.key === "ArrowRight") return getNextPicture();
   if (e.key === "ArrowLeft") return getPrevPicture();
+}
+
+function getNextPicture() {
+  activeImg += 1;
+  if (activeImg > imgLength) activeImg = 0;
+  getData(activeImg);
+}
+
+function getPrevPicture() {
+  activeImg -= 1;
+  if (activeImg < 0) activeImg = imgLength;
+  getData(activeImg);
+}
+
+function getData(index) {
+  const d = galleryItems[index];
+  updateAttr(d.original, d.description);
+}
+
+function updateAttr(src = "", alt = "") {
+  refs.imgEl.src = src;
+  refs.imgEl.alt = alt;
 }
 
 const galleryMarkup = createGalleryMarkupStr(galleryItems);
@@ -127,8 +126,8 @@ refs.galleryEl.insertAdjacentHTML("beforeend", galleryMarkup);
 
 function createGalleryMarkupStr(images) {
   return images
-    .map(({ preview, original, description }) => {
-      return `<li class="gallery__item"><a class="gallery__link" href="${original}"><img class="gallery__image" src="${preview}" data-source="${original}" alt="${description}"></a></li>`;
+    .map(({ preview, original, description }, index) => {
+      return `<li class="gallery__item"><a class="gallery__link" href="${original}"><img class="gallery__image" src="${preview}" data-index="${index}" data-source="${original}" alt="${description}"></a></li>`;
     })
     .join("");
 }
