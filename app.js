@@ -63,3 +63,72 @@ const galleryItems = [
     description: "Lighthouse Coast Sea",
   },
 ];
+
+const refs = {
+  galleryEl: document.querySelector(".gallery"),
+  imgEl: document.querySelector("img"),
+  modalEl: document.querySelector(".lightbox"),
+  closeBtnEl: document.querySelector('[data-action="close-lightbox"]'),
+};
+
+refs.closeBtnEl.textContent = "X";
+
+refs.galleryEl.addEventListener("click", onImgClick);
+refs.closeBtnEl.addEventListener("click", onCloseButtonClick);
+document.addEventListener("keydown", onKeyPress);
+
+function onImgClick(e) {
+  e.preventDefault();
+  if (e.target.nodeName !== "IMG") return false;
+  refs.imgEl.src = e.target.dataset.source;
+  refs.modalEl.classList.add("is-open");
+  e.target.classList.add("open-img");
+}
+
+function onCloseButtonClick(e) {
+  refs.modalEl.classList.remove("is-open");
+  refs.imgEl.src = "";
+}
+
+function getNextPicture() {
+  const currentImg = document.querySelector(".open-img");
+  if (!currentImg) return false;
+  let nextLi = currentImg.parentNode.parentNode.nextSibling;
+  if (!nextLi) nextLi = refs.galleryEl.firstChild;
+  const nextImg = nextLi.querySelector("img");
+  if (!nextImg) return false;
+  refs.imgEl.src = nextImg.dataset.source;
+  currentImg.classList.remove("open-img");
+  nextImg.classList.add("open-img");
+}
+
+function getPrevPicture() {
+  const currentImg = document.querySelector(".open-img");
+  if (!currentImg) return false;
+  let prevLi = currentImg.parentNode.parentNode.previousSibling;
+  if (!prevLi) prevLi = refs.galleryEl.lastChild;
+  const prevImg = prevLi.querySelector("img");
+  if (!prevImg) return false;
+  refs.imgEl.src = prevImg.dataset.source;
+  currentImg.classList.remove("open-img");
+  prevImg.classList.add("open-img");
+}
+
+function onKeyPress(e) {
+  if (e.key === "Escape") return onCloseButtonClick();
+  console.log(e.key);
+  if (e.key === "ArrowRight") return getNextPicture();
+  if (e.key === "ArrowLeft") return getPrevPicture();
+}
+
+const galleryMarkup = createGalleryMarkupStr(galleryItems);
+
+refs.galleryEl.insertAdjacentHTML("beforeend", galleryMarkup);
+
+function createGalleryMarkupStr(images) {
+  return images
+    .map(({ preview, original, description }) => {
+      return `<li class="gallery__item"><a class="gallery__link" href="${original}"><img class="gallery__image" src="${preview}" data-source="${original}" alt="${description}"></a></li>`;
+    })
+    .join("");
+}
