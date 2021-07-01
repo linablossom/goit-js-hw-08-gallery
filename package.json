@@ -5,8 +5,10 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "parcel src/index.html",
-    "build": "parcel build src/index.html"
+    "dev": "parcel src/*.html",
+    "build": "parcel build src/*.html --public-url /goit-js-hw-08-gallery/",
+    "deploy": "gh-pages -d dist",
+    "predeploy": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -24,6 +26,8 @@
     "posthtml-include": "^1.7.1"
   },
   "dependencies": {
+    "gh": "^2.8.9",
+    "pages": "0.0.16",
     "src": "^1.1.2"
   }
 }
